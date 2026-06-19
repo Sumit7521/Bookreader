@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   title: "Discover - Bookreader",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function DiscoverPage() {
   const reviews = await getPublicReviewsAction();
 

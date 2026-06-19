@@ -29,6 +29,7 @@ export async function saveReviewAction(bookId: string, data: Partial<{ rating: n
       { upsert: true, returnDocument: 'after' }
     ).lean();
     revalidatePath(`/library/${bookId}`);
+    revalidatePath('/discover');
     return { success: true, review: JSON.parse(JSON.stringify(review)) };
   } catch (error) {
     console.error(error);
