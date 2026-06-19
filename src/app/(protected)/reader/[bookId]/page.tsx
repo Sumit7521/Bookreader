@@ -28,16 +28,22 @@ export default async function ReaderPage({ params }: { params: Promise<{ bookId:
   
   if (signedFileUrl.includes("cloudinary.com") && publicId) {
     const resourceType = signedFileUrl.includes("/raw/") ? "raw" : "image";
+    let targetPublicId = publicId;
+    
+    // Cloudinary requires the exact path to be signed. 
+    // If it's an image resource, we must request the .pdf format.
+    if (resourceType === "image" && !targetPublicId.endsWith(".pdf")) {
+      targetPublicId += ".pdf";
+    }
+
     const cloudinary = (await import("@/lib/cloudinary")).default;
-    signedFileUrl = cloudinary.utils.url(publicId, {
+    signedFileUrl = cloudinary.utils.url(targetPublicId, {
       secure: true,
       sign_url: true,
+      type: "authenticated",
       resource_type: resourceType,
+      analytics: false,
     });
-    // Add .pdf extension if it's not present and it's an image resource type
-    if (resourceType === "image" && !signedFileUrl.includes(".pdf")) {
-       signedFileUrl = signedFileUrl.replace(publicId, `${publicId}.pdf`);
-    }
   }
 
   return (

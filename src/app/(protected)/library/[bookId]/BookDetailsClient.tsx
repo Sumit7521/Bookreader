@@ -3,13 +3,15 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Book as BookIcon, ChevronLeft, Star, Save } from "lucide-react";
+import { Book as BookIcon, ChevronLeft, Star, Save, Trash2 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { updateBookStatusAction } from "@/actions/book";
+import { updateBookStatusAction, deleteBookAction } from "@/actions/book";
 import { saveReviewAction } from "@/actions/review";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useRouter } from "next/navigation";
 
 interface BookDetailsProps {
   book: {
@@ -30,6 +32,7 @@ interface BookDetailsProps {
 }
 
 export function BookDetailsClient({ book, initialReview }: BookDetailsProps) {
+  const router = useRouter();
   const [status, setStatus] = useState(book.status || "not_started");
   const [review, setReview] = useState({
     rating: initialReview?.rating || 0,
@@ -40,6 +43,20 @@ export function BookDetailsClient({ book, initialReview }: BookDetailsProps) {
     characterNotes: initialReview?.characterNotes || "",
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    const res = await deleteBookAction(book._id);
+    setIsDeleting(false);
+    if (res.success) {
+      setDeleteOpen(false);
+      router.push("/library");
+    } else {
+      alert(res.error || "Failed to delete book");
+    }
+  };
 
   const handleStatusChange = async (newStatus: string | null) => {
     if (!newStatus) return;
@@ -101,9 +118,35 @@ export function BookDetailsClient({ book, initialReview }: BookDetailsProps) {
                 </Select>
               </div>
 
-              <Link href={`/reader/${book._id}`} className={buttonVariants({ className: "w-full bg-amber-600 hover:bg-amber-700 text-white shadow-sm mt-4 transition-colors" })}>
-                Read PDF
-              </Link>
+              <div className="flex flex-col gap-2 mt-4">
+                <Link href={`/reader/${book._id}`} className={buttonVariants({ className: "w-full bg-amber-600 hover:bg-amber-700 text-white shadow-sm transition-colors" })}>
+                  Read PDF
+                </Link>
+                
+                <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="w-full border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-900/30 dark:text-red-400 dark:hover:bg-red-950/20 transition-colors">
+                      <Trash2 className="h-4 w-4 mr-2" /> Delete Book
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="bg-[#fdfbf7] dark:bg-stone-950 border-stone-200 dark:border-stone-800">
+                    <DialogHeader>
+                      <DialogTitle className="font-serif text-xl text-stone-800 dark:text-stone-100">Delete Book</DialogTitle>
+                      <DialogDescription className="text-stone-500 dark:text-stone-400">
+                        Are you sure you want to delete <strong className="font-semibold text-stone-700 dark:text-stone-300">"{book.title}"</strong>? This will permanently delete the book file from Cloudinary and all associated data, including reviews and highlights.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex justify-end gap-3 pt-4">
+                      <Button variant="outline" onClick={() => setDeleteOpen(false)} disabled={isDeleting} className="border-stone-200 dark:border-stone-800">
+                        Cancel
+                      </Button>
+                      <Button onClick={handleDelete} disabled={isDeleting} className="bg-red-600 hover:bg-red-700 text-white">
+                        {isDeleting ? "Deleting..." : "Permanently Delete"}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
             </CardContent>
           </Card>
         </div>

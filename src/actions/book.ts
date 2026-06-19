@@ -33,3 +33,46 @@ export async function updateBookStatusAction(bookId: string, status: string) {
     return { error: "Failed to update book status" };
   }
 }
+
+export async function deleteBookAction(bookId: string) {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Unauthorized" };
+  try {
+    await connectToDatabase();
+    
+    const book = await Book.findOne({ _id: bookId, userId: session.user.id });
+    if (!book) return { error: "Book not found" };
+
+    if (book.filePublicId) {
+      const resourceType = book.fileUrl?.includes("/raw/") ? "raw" : "image";
+      const type = book.fileUrl?.includes("/authenticated/") ? "authenticated" : "upload";
+      try {
+        const cloudinary = (await import("@/lib/cloudinary")).default;
+        await cloudinary.uploader.destroy(book.filePublicId, {
+          resource_type: resourceType,
+          type: type
+        });
+      } catch (cloudinaryError) {
+        console.error("Cloudinary delete failed:", cloudinaryError);
+      }
+    }
+
+    await Book.deleteOne({ _id: bookId, userId: session.user.id });
+
+    const Review = (await import("@/models/Review")).default;
+    const Annotation = (await import("@/models/Annotation")).default;
+    const Bookmark = (await import("@/models/Bookmark")).default;
+    const ReadingSession = (await import("@/models/ReadingSession")).default;
+
+    await Review.deleteMany({ bookId, userId: session.user.id });
+    await Annotation.deleteMany({ bookId, userId: session.user.id });
+    await Bookmark.deleteMany({ bookId, userId: session.user.id });
+    await ReadingSession.deleteMany({ bookId, userId: session.user.id });
+
+    revalidatePath("/library");
+    return { success: true };
+  } catch (error) {
+    console.error(error);
+    return { error: "Failed to delete book" };
+  }
+}

@@ -39,8 +39,8 @@ export function UploadBookModal({ folders }: UploadBookModalProps) {
     }
 
     try {
-      // 1. Get Signature
-      const sigRes = await getCloudinarySignatureAction("books");
+      // 1. Get Signature with type=authenticated
+      const sigRes = await getCloudinarySignatureAction("books", "authenticated");
       if (!sigRes.success || !sigRes.signature || !sigRes.timestamp || !sigRes.apiKey) {
         throw new Error(sigRes.error || "Failed to get upload signature");
       }
@@ -52,6 +52,7 @@ export function UploadBookModal({ folders }: UploadBookModalProps) {
       formData.append("timestamp", sigRes.timestamp.toString());
       formData.append("signature", sigRes.signature);
       formData.append("folder", "books");
+      formData.append("type", "authenticated");
 
       const res = await fetch(`https://api.cloudinary.com/v1_1/${sigRes.cloudName}/auto/upload`, {
         method: "POST",
