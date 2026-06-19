@@ -53,7 +53,7 @@ export function UploadBookModal({ folders }: UploadBookModalProps) {
       formData.append("signature", sigRes.signature);
       formData.append("folder", "books");
 
-      const res = await fetch(`https://api.cloudinary.com/v1_1/${sigRes.cloudName}/raw/upload`, {
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${sigRes.cloudName}/auto/upload`, {
         method: "POST",
         body: formData,
       });
