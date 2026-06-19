@@ -3,7 +3,7 @@
 import { auth } from "@/auth";
 import crypto from "crypto";
 
-export async function getCloudinarySignatureAction() {
+export async function getCloudinarySignatureAction(folder?: string) {
   const session = await auth();
   if (!session?.user?.id) return { success: false, error: "Unauthorized" };
 
@@ -15,9 +15,12 @@ export async function getCloudinarySignatureAction() {
   }
 
   // Cloudinary requires signatures to be created with specific parameters.
-  // We specify `timestamp` and `upload_preset` if we are still using a preset, or just `timestamp`.
-  // To keep it simple and secure, we'll sign the timestamp and maybe folder.
-  const signatureString = `timestamp=${timestamp}${apiSecret}`;
+  // Parameters must be sorted alphabetically: folder comes before timestamp.
+  let signatureString = `timestamp=${timestamp}`;
+  if (folder) {
+    signatureString = `folder=${folder}&timestamp=${timestamp}`;
+  }
+  signatureString += apiSecret;
   
   const signature = crypto.createHash("sha1").update(signatureString).digest("hex");
 

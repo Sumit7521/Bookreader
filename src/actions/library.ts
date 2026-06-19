@@ -53,6 +53,29 @@ export async function uploadBookAction(prevState: unknown, formData: FormData) {
   }
 }
 
+export async function saveBookRecordAction(data: { title: string, author: string, folderId: string, fileUrl: string, filePublicId: string }) {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Unauthorized" };
+
+  try {
+    await connectToDatabase();
+    await Book.create({
+      userId: session.user.id,
+      title: data.title,
+      author: data.author || undefined,
+      fileUrl: data.fileUrl,
+      filePublicId: data.filePublicId,
+      folderId: data.folderId || undefined,
+    });
+
+    revalidatePath("/library");
+    return { success: true };
+  } catch (error) {
+    console.error(error);
+    return { error: "Failed to save book record." };
+  }
+}
+
 export async function createFolderAction(prevState: unknown, formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) return { error: "Unauthorized" };
