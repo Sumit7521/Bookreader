@@ -92,7 +92,7 @@ export default function UserTable({ initialUsers }: { initialUsers: any[] }) {
                       </span>
                     ) : (
                       <span className="text-muted-foreground">
-                        {new Date(user.lastActiveAt).toLocaleString(undefined, {
+                        {new Date(user.lastActiveAt).toLocaleString('en-US', {
                           month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
                         })}
                       </span>
@@ -102,7 +102,7 @@ export default function UserTable({ initialUsers }: { initialUsers: any[] }) {
                   )}
                 </td>
                 <td className="px-6 py-4 text-muted-foreground">
-                  {new Date(user.createdAt).toLocaleDateString()}
+                  {new Date(user.createdAt).toLocaleDateString('en-US')}
                 </td>
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-2">
