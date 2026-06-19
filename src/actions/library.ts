@@ -59,6 +59,32 @@ export async function saveBookRecordAction(data: { title: string, author: string
 
   try {
     await connectToDatabase();
+    
+    let coverImage = undefined;
+    if (data.filePublicId && data.fileUrl.includes("cloudinary.com")) {
+      const resourceType = data.fileUrl.includes("/raw/") ? "raw" : "image";
+      if (resourceType === "image") {
+        const cloudinaryLib = (await import("@/lib/cloudinary")).default;
+        
+        let targetPublicId = data.filePublicId;
+        if (!targetPublicId.endsWith(".pdf")) {
+          targetPublicId += ".pdf";
+        }
+        
+        coverImage = cloudinaryLib.utils.url(targetPublicId, {
+          secure: true,
+          sign_url: true,
+          type: "authenticated",
+          resource_type: "image",
+          format: "jpg",
+          transformation: [
+            { width: 400, crop: "scale" },
+            { page: 1 }
+          ]
+        });
+      }
+    }
+
     await Book.create({
       userId: session.user.id,
       title: data.title,
@@ -66,6 +92,7 @@ export async function saveBookRecordAction(data: { title: string, author: string
       fileUrl: data.fileUrl,
       filePublicId: data.filePublicId,
       folderId: data.folderId || undefined,
+      coverImage: coverImage,
     });
 
     revalidatePath("/library");
