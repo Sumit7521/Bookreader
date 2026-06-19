@@ -8,8 +8,10 @@ import { ReaderToolbar } from "./ReaderToolbar";
 import { AnnotationsSidebar } from "./AnnotationsSidebar";
 import { saveReadingProgressAction } from "@/actions/reader";
 import { getAnnotationsAction, saveAnnotationAction, deleteAnnotationAction, updateAnnotationNoteAction } from "@/actions/annotations";
-import { Loader2 } from "lucide-react";
+import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 // Configure PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
@@ -23,6 +25,7 @@ interface PDFViewerProps {
 export function PDFViewer({ bookId, fileUrl, initialPage }: PDFViewerProps) {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState<number>(initialPage);
+  const [jumpTo, setJumpTo] = useState("");
   const [scale, setScale] = useState<number>(1.0);
   const [searchText, setSearchText] = useState<string>("");
   const [annotations, setAnnotations] = useState<{ _id: string, bookId: string, pageNumber: number, type: "highlight" | "margin", selectedText?: string, color?: string, note?: string, createdAt: string }[]>([]);
@@ -45,9 +48,11 @@ export function PDFViewer({ bookId, fileUrl, initialPage }: PDFViewerProps) {
       setShowSidebar(!isMobile);
       
       if (pdfWrapperRef.current) {
-        setContainerWidth(pdfWrapperRef.current.clientWidth - 32); // 32px for p-4 padding
+        // Use full clientWidth on mobile (no padding), otherwise subtract padding
+        const padding = isMobile ? 0 : 32; 
+        setContainerWidth(pdfWrapperRef.current.clientWidth - padding);
       } else if (isMobile) {
-        setContainerWidth(window.innerWidth - 32);
+        setContainerWidth(window.innerWidth);
       }
     };
 
@@ -232,18 +237,19 @@ export function PDFViewer({ bookId, fileUrl, initialPage }: PDFViewerProps) {
           onToggleSidebar={handleToggleSidebar}
         />
       
-        <div className="flex-1 overflow-auto bg-stone-200 dark:bg-stone-900 flex justify-center p-4 custom-scrollbar" ref={pdfWrapperRef}>
+        <div className="flex-1 overflow-auto bg-stone-200 dark:bg-stone-900 flex justify-center p-0 sm:p-4 custom-scrollbar" ref={pdfWrapperRef}>
           {fileUrl ? (
             <Document
               file={fileUrl}
               onLoadSuccess={onDocumentLoadSuccess}
+              className="flex flex-col items-center justify-center min-h-full w-full"
               loading={
-                <div className="flex items-center gap-2 justify-center h-full text-stone-500 font-serif">
+                <div className="flex items-center gap-2 justify-center h-full text-stone-500 font-serif w-full">
                   <Loader2 className="h-5 w-5 animate-spin" /> Opening book...
                 </div>
               }
               error={
-                <div className="flex items-center justify-center h-full text-red-500 font-serif">
+                <div className="flex items-center justify-center h-full text-red-500 font-serif w-full">
                   Failed to load PDF.
                 </div>
               }
@@ -259,10 +265,52 @@ export function PDFViewer({ bookId, fileUrl, initialPage }: PDFViewerProps) {
               />
             </Document>
           ) : (
-            <div className="flex items-center justify-center h-full text-stone-500 font-serif">
+            <div className="flex items-center justify-center h-full text-stone-500 font-serif w-full">
               No PDF linked to this book.
             </div>
           )}
+        </div>
+
+        {/* Bottom Pagination Bar */}
+        <div className="p-2 bg-[#fdfbf7] dark:bg-stone-900 border-t border-stone-200 dark:border-stone-800 flex justify-center items-center gap-2 shrink-0 z-10 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] dark:shadow-[0_-2px_10px_rgba(0,0,0,0.2)]">
+          <Button 
+            variant="outline" 
+            size="icon" 
+            className="h-8 w-8"
+            onClick={() => handlePageChange(pageNumber - 1)}
+            disabled={pageNumber <= 1}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            const p = parseInt(jumpTo, 10);
+            if (p && p > 0 && (!numPages || p <= numPages)) {
+              handlePageChange(p);
+              setJumpTo("");
+            }
+          }} className="flex items-center gap-1">
+            <Input 
+              value={jumpTo}
+              onChange={(e) => setJumpTo(e.target.value)}
+              placeholder={pageNumber.toString()}
+              className="w-12 h-8 text-center text-sm px-1 bg-white dark:bg-stone-950"
+            />
+            <span className="text-xs font-medium text-stone-500 whitespace-nowrap">
+              / {numPages || "?"}
+            </span>
+          </form>
+
+          <Button 
+            variant="outline" 
+            size="icon" 
+            className="h-8 w-8"
+            onClick={() => handlePageChange(pageNumber + 1)}
+            disabled={numPages ? pageNumber >= numPages : false}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
 
         {/* Floating Selection Toolbar */}

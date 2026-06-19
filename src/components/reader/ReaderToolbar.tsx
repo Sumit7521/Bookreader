@@ -64,43 +64,8 @@ export function ReaderToolbar({
   return (
     <div className="flex flex-row flex-wrap sm:flex-nowrap items-center justify-between gap-2 p-2 bg-[#fdfbf7] dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 shadow-sm z-10 sticky top-0">
       
-      {/* Pagination Controls */}
-      <div className="flex items-center gap-1">
-        <Button 
-          variant="outline" 
-          size="icon" 
-          className="h-8 w-8"
-          onClick={() => onPageChange(pageNumber - 1)}
-          disabled={pageNumber <= 1}
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-        
-        <form onSubmit={handleJump} className="flex items-center gap-1">
-          <Input 
-            value={jumpTo}
-            onChange={(e) => setJumpTo(e.target.value)}
-            placeholder={pageNumber.toString()}
-            className="w-12 h-8 text-center text-sm px-1 bg-white dark:bg-stone-950"
-          />
-          <span className="text-xs font-medium text-stone-500 hidden sm:inline whitespace-nowrap">
-            / {numPages || "?"}
-          </span>
-        </form>
-
-        <Button 
-          variant="outline" 
-          size="icon" 
-          className="h-8 w-8"
-          onClick={() => onPageChange(pageNumber + 1)}
-          disabled={numPages ? pageNumber >= numPages : false}
-        >
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-      </div>
-
-      {/* Center - Search */}
-      <div className="flex-1 flex justify-center order-3 w-full sm:w-auto sm:order-none mt-2 sm:mt-0 max-w-sm">
+      {/* Search */}
+      <div className="flex-1 flex justify-center w-full sm:w-auto max-w-sm">
         {isSearching ? (
           <form onSubmit={handleSearchSubmit} className="flex items-center gap-1 w-full relative">
             <Input 
@@ -118,15 +83,15 @@ export function ReaderToolbar({
             <Button type="submit" size="sm" variant="secondary" className="h-8 px-2 text-xs">Find</Button>
           </form>
         ) : (
-          <Button variant="ghost" size="sm" className="text-stone-500 h-8 px-2 text-xs" onClick={() => setIsSearching(true)}>
+          <Button variant="ghost" size="sm" className="text-stone-500 h-8 px-2 text-xs w-full justify-start sm:justify-center sm:w-auto" onClick={() => setIsSearching(true)}>
             <Search className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">Search PDF</span>
+            <span className="inline">Search PDF</span>
           </Button>
         )}
       </div>
 
       {/* Right - View Controls */}
-      <div className="flex items-center gap-1 order-2 sm:order-none">
+      <div className="flex items-center gap-1">
         <div className="flex items-center bg-white dark:bg-stone-950 rounded-md border border-stone-200 dark:border-stone-800 p-0.5">
           <Button variant="ghost" size="icon" className="h-7 w-7 rounded-sm" onClick={onZoomOut}>
             <ZoomOut className="h-3.5 w-3.5" />
@@ -136,7 +101,7 @@ export function ReaderToolbar({
             <ZoomIn className="h-3.5 w-3.5" />
           </Button>
         </div>
-        <Button variant="outline" size="icon" className="h-8 w-8 hidden xs:flex" onClick={onFullscreen} title="Toggle fullscreen">
+        <Button variant="outline" size="icon" className="h-8 w-8 flex" onClick={onFullscreen} title="Toggle fullscreen">
           <Maximize className="h-3.5 w-3.5" />
         </Button>
         <Button 
