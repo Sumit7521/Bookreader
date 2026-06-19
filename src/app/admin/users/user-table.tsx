@@ -107,11 +107,9 @@ export default function UserTable({ initialUsers }: { initialUsers: any[] }) {
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-2">
                     <Dialog>
-                      <DialogTrigger asChild>
-                        <Button variant="outline" size="sm" className="gap-2">
-                          <BookOpenIcon size={14} />
-                          Books ({user.books?.length || 0})
-                        </Button>
+                      <DialogTrigger render={<Button variant="outline" size="sm" className="gap-2" />}>
+                        <BookOpenIcon size={14} />
+                        Books ({user.books?.length || 0})
                       </DialogTrigger>
                       <DialogContent className="sm:max-w-xl max-h-[80vh] flex flex-col">
                         <DialogHeader>
