@@ -41,6 +41,8 @@ export function PDFViewer({ bookId, fileUrl, initialPage }: PDFViewerProps) {
   const [containerWidth, setContainerWidth] = useState<number>();
   const pdfWrapperRef = useRef<HTMLDivElement>(null);
 
+  const [isPseudoFullscreen, setIsPseudoFullscreen] = useState(false);
+
   useEffect(() => {
     const checkMobile = () => {
       const isMobile = window.innerWidth < 1024;
@@ -101,12 +103,36 @@ export function PDFViewer({ bookId, fileUrl, initialPage }: PDFViewerProps) {
 
   const handleZoomIn = () => setScale(prev => Math.min(prev + 0.2, 3.0));
   const handleZoomOut = () => setScale(prev => Math.max(prev - 0.2, 0.5));
+  
   const handleFullscreen = () => {
+    if (isPseudoFullscreen) {
+      setIsPseudoFullscreen(false);
+      return;
+    }
+
     if (containerRef.current) {
-      if (document.fullscreenElement) {
-        document.exitFullscreen();
+      const doc = document as any;
+      const elem = containerRef.current as any;
+
+      if (doc.fullscreenElement || doc.webkitFullscreenElement) {
+        if (doc.exitFullscreen) {
+          doc.exitFullscreen();
+        } else if (doc.webkitExitFullscreen) {
+          doc.webkitExitFullscreen();
+        }
       } else {
-        containerRef.current.requestFullscreen();
+        if (elem.requestFullscreen) {
+          elem.requestFullscreen().catch((err: any) => {
+            console.warn(`Fullscreen API failed, falling back: ${err.message}`);
+            setIsPseudoFullscreen(true);
+          });
+        } else if (elem.webkitRequestFullscreen) { 
+          // desktop Safari
+          elem.webkitRequestFullscreen();
+        } else {
+          // iOS Safari doesn't support requestFullscreen on div
+          setIsPseudoFullscreen(true);
+        }
       }
     }
   };
@@ -220,7 +246,14 @@ export function PDFViewer({ bookId, fileUrl, initialPage }: PDFViewerProps) {
   );
 
   return (
-    <div className="flex h-full bg-stone-100 dark:bg-stone-950 rounded-lg overflow-hidden border border-stone-200 dark:border-stone-800" ref={containerRef}>
+    <div 
+      className={
+        isPseudoFullscreen 
+        ? "fixed inset-0 z-[100] flex h-[100dvh] w-[100dvw] bg-stone-100 dark:bg-stone-950 overflow-hidden" 
+        : "flex h-full bg-stone-100 dark:bg-stone-950 rounded-lg overflow-hidden border border-stone-200 dark:border-stone-800"
+      } 
+      ref={containerRef}
+    >
       
       {/* PDF View Area */}
       <div className="flex-1 flex flex-col min-w-0 relative" onMouseUp={handleMouseUp}>
