@@ -61,6 +61,7 @@ export function ReaderToolbar({
     setIsSearching(false);
   };
 
+  return (
     <div className="flex flex-row flex-wrap sm:flex-nowrap items-center justify-between gap-2 p-2 bg-[#fdfbf7] dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 shadow-sm z-10 sticky top-0">
       
       {/* Pagination Controls */}
