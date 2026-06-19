@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Star } from "lucide-react";
 import Image from "next/image";
 import { Metadata } from "next";
+import { AddBookButton } from "./AddBookButton";
 
 export const metadata: Metadata = {
   title: "Discover - Bookreader",
@@ -70,6 +71,10 @@ export default async function DiscoverPage() {
                     <span className="font-semibold block mb-1 text-xs uppercase tracking-wider text-stone-500">Takeaway</span>
                     {review.keyTakeaways}
                   </div>
+                )}
+                
+                {review.bookId?._id && (
+                  <AddBookButton originalBookId={review.bookId._id.toString()} />
                 )}
               </CardContent>
             </Card>
