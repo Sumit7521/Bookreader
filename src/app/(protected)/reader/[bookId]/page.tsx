@@ -57,12 +57,13 @@ export default async function ReaderPage({ params }: { params: Promise<{ bookId:
         </h1>
       </div>
       
-      {/* We pass the signed URL */}
-      <PDFViewerClient 
-        bookId={bookId} 
-        fileUrl={signedFileUrl} 
-        initialPage={initialPage} 
-      />
+      <div className="flex-1 min-h-0">
+        <PDFViewerClient 
+          bookId={bookId} 
+          fileUrl={signedFileUrl} 
+          initialPage={initialPage} 
+        />
+      </div>
     </div>
   );
 }

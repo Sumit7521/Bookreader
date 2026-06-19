@@ -215,7 +215,7 @@ export function PDFViewer({ bookId, fileUrl, initialPage }: PDFViewerProps) {
   );
 
   return (
-    <div className="flex h-[calc(100vh-6rem)] bg-stone-100 dark:bg-stone-950 rounded-lg overflow-hidden border border-stone-200 dark:border-stone-800" ref={containerRef}>
+    <div className="flex h-full bg-stone-100 dark:bg-stone-950 rounded-lg overflow-hidden border border-stone-200 dark:border-stone-800" ref={containerRef}>
       
       {/* PDF View Area */}
       <div className="flex-1 flex flex-col min-w-0 relative" onMouseUp={handleMouseUp}>
