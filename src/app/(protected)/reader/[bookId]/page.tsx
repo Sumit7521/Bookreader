@@ -1,5 +1,6 @@
 import { getReadingProgressAction } from "@/actions/reader";
-import { PDFViewer } from "@/components/reader/PDFViewer";
+import dynamic from "next/dynamic";
+const PDFViewer = dynamic(() => import("@/components/reader/PDFViewer").then(mod => mod.PDFViewer), { ssr: false });
 import connectToDatabase from "@/lib/db";
 import Book from "@/models/Book";
 import { auth } from "@/auth";
