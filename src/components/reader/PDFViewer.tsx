@@ -35,16 +35,31 @@ export function PDFViewer({ bookId, fileUrl, initialPage }: PDFViewerProps) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [isMobileOrTablet, setIsMobileOrTablet] = useState(false);
 
+  const [containerWidth, setContainerWidth] = useState<number>();
+  const pdfWrapperRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const checkMobile = () => {
       const isMobile = window.innerWidth < 1024;
       setIsMobileOrTablet(isMobile);
       setShowSidebar(!isMobile);
+      
+      if (pdfWrapperRef.current) {
+        setContainerWidth(pdfWrapperRef.current.clientWidth - 32); // 32px for p-4 padding
+      } else if (isMobile) {
+        setContainerWidth(window.innerWidth - 32);
+      }
     };
 
     checkMobile();
+    // Allow layout to settle before checking again
+    const timeoutId = setTimeout(checkMobile, 100);
+    
     window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
+    return () => {
+      window.removeEventListener("resize", checkMobile);
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   const handleToggleSidebar = () => {
@@ -217,7 +232,7 @@ export function PDFViewer({ bookId, fileUrl, initialPage }: PDFViewerProps) {
           onToggleSidebar={handleToggleSidebar}
         />
       
-        <div className="flex-1 overflow-auto bg-stone-200 dark:bg-stone-900 flex justify-center p-4 custom-scrollbar">
+        <div className="flex-1 overflow-auto bg-stone-200 dark:bg-stone-900 flex justify-center p-4 custom-scrollbar" ref={pdfWrapperRef}>
           {fileUrl ? (
             <Document
               file={fileUrl}
@@ -236,6 +251,7 @@ export function PDFViewer({ bookId, fileUrl, initialPage }: PDFViewerProps) {
               <Page 
                 pageNumber={pageNumber} 
                 scale={scale} 
+                width={isMobileOrTablet ? containerWidth : undefined}
                 className="shadow-xl"
                 renderAnnotationLayer={true}
                 renderTextLayer={true}
