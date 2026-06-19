@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Menu, BookOpen, LayoutDashboard, Library, PenTool, Settings } from "lucide-react";
 
 export function MobileNav() {
@@ -22,10 +22,8 @@ export function MobileNav() {
   return (
     <div className="md:hidden flex items-center gap-2">
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" aria-label="Open mobile menu" className="md:hidden">
-            <Menu className="w-5 h-5" />
-          </Button>
+        <SheetTrigger className={buttonVariants({ variant: "ghost", size: "icon" }) + " md:hidden"} aria-label="Open mobile menu">
+          <Menu className="w-5 h-5" />
         </SheetTrigger>
         <SheetContent side="left" className="w-[280px] bg-stone-50 dark:bg-[#0a0a0a] p-0 border-r border-stone-200 dark:border-stone-800 shadow-2xl">
           <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
