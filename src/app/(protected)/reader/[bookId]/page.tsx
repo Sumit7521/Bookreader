@@ -1,6 +1,5 @@
 import { getReadingProgressAction } from "@/actions/reader";
-import dynamic from "next/dynamic";
-const PDFViewer = dynamic(() => import("@/components/reader/PDFViewer").then(mod => mod.PDFViewer), { ssr: false });
+import { PDFViewerClient } from "@/components/reader/PDFViewerClient";
 import connectToDatabase from "@/lib/db";
 import Book from "@/models/Book";
 import { auth } from "@/auth";
@@ -23,6 +22,24 @@ export default async function ReaderPage({ params }: { params: Promise<{ bookId:
   const progressResult = await getReadingProgressAction(bookId);
   const initialPage = progressResult.page || 1;
 
+  // Generate a signed URL to bypass Cloudinary's strict PDF delivery restrictions
+  let signedFileUrl = (book as { fileUrl?: string }).fileUrl || "";
+  const publicId = (book as { filePublicId?: string }).filePublicId;
+  
+  if (signedFileUrl.includes("cloudinary.com") && publicId) {
+    const resourceType = signedFileUrl.includes("/raw/") ? "raw" : "image";
+    const cloudinary = (await import("@/lib/cloudinary")).default;
+    signedFileUrl = cloudinary.utils.url(publicId, {
+      secure: true,
+      sign_url: true,
+      resource_type: resourceType,
+    });
+    // Add .pdf extension if it's not present and it's an image resource type
+    if (resourceType === "image" && !signedFileUrl.includes(".pdf")) {
+       signedFileUrl = signedFileUrl.replace(publicId, `${publicId}.pdf`);
+    }
+  }
+
   return (
     <div className="flex flex-col h-full space-y-4">
       <div className="flex items-center gap-4 px-2">
@@ -34,10 +51,10 @@ export default async function ReaderPage({ params }: { params: Promise<{ bookId:
         </h1>
       </div>
       
-      {/* We pass the secure URL. We need to tell TS that fileUrl exists */}
-      <PDFViewer 
+      {/* We pass the signed URL */}
+      <PDFViewerClient 
         bookId={bookId} 
-        fileUrl={(book as { fileUrl?: string }).fileUrl || ""} 
+        fileUrl={signedFileUrl} 
         initialPage={initialPage} 
       />
     </div>

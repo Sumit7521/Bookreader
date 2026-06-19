@@ -118,6 +118,7 @@ export async function getLibraryDataAction() {
       .then(docs => docs.map(doc => ({ 
         ...doc, 
         _id: doc._id.toString(),
+        userId: doc.userId.toString(),
         createdAt: (doc.createdAt as Date)?.toISOString() || new Date().toISOString()
       })));
       
@@ -127,8 +128,10 @@ export async function getLibraryDataAction() {
       .then(docs => docs.map(doc => ({ 
         ...doc, 
         _id: doc._id.toString(),
+        userId: doc.userId.toString(),
         folderId: doc.folderId?.toString(),
-        createdAt: (doc.createdAt as Date)?.toISOString() || new Date().toISOString()
+        createdAt: (doc.createdAt as Date)?.toISOString() || new Date().toISOString(),
+        updatedAt: (doc.updatedAt as Date)?.toISOString() || new Date().toISOString()
       })));
 
     return { folders, books };
