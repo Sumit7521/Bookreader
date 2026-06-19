@@ -249,8 +249,8 @@ export function PDFViewer({ bookId, fileUrl, initialPage }: PDFViewerProps) {
     <div 
       className={
         isPseudoFullscreen 
-        ? "fixed inset-0 z-[100] flex h-[100dvh] w-[100dvw] bg-stone-100 dark:bg-stone-950 overflow-hidden" 
-        : "flex h-full bg-stone-100 dark:bg-stone-950 rounded-lg overflow-hidden border border-stone-200 dark:border-stone-800"
+        ? "fixed inset-0 z-[100] flex flex-col h-[100dvh] w-[100dvw] bg-stone-100 dark:bg-stone-950 overflow-hidden" 
+        : "flex h-auto lg:h-full bg-stone-100 dark:bg-stone-950 rounded-lg lg:overflow-hidden border border-stone-200 dark:border-stone-800"
       } 
       ref={containerRef}
     >
@@ -270,7 +270,7 @@ export function PDFViewer({ bookId, fileUrl, initialPage }: PDFViewerProps) {
           onToggleSidebar={handleToggleSidebar}
         />
       
-        <div className="flex-1 overflow-auto bg-stone-200 dark:bg-stone-900 flex justify-center p-0 sm:p-4 custom-scrollbar" ref={pdfWrapperRef}>
+        <div className="flex-1 lg:overflow-auto bg-stone-200 dark:bg-stone-900 flex justify-center p-0 sm:p-4 custom-scrollbar min-h-[50vh]" ref={pdfWrapperRef}>
           {fileUrl ? (
             <Document
               file={fileUrl}
