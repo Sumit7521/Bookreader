@@ -71,7 +71,7 @@ function SortableChapterItem({ chapter, projectId, isActive, onDelete, onRename 
   );
 }
 
-export function ChapterSidebar({ projectId, initialChapters, activeChapterId }: { projectId: string, initialChapters: ChapterType[], activeChapterId: string }) {
+export function ChapterSidebar({ projectId, initialChapters, activeChapterId, className }: { projectId: string, initialChapters: ChapterType[], activeChapterId: string, className?: string }) {
   const [chapters, setChapters] = useState(initialChapters);
   const [isCreating, setIsCreating] = useState(false);
   const router = useRouter();
@@ -124,7 +124,7 @@ export function ChapterSidebar({ projectId, initialChapters, activeChapterId }: 
   };
 
   return (
-    <div className="w-64 h-full border-r border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#151515] flex flex-col pt-4 shrink-0">
+    <div className={`${className || "flex w-64"} h-full border-r border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#151515] flex-col pt-4 shrink-0`}>
       <div className="px-4 pb-4 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between">
         <h3 className="font-serif font-bold text-stone-800 dark:text-stone-200 text-sm tracking-wide uppercase">Chapters</h3>
         <Button variant="ghost" size="icon" onClick={handleAddChapter} disabled={isCreating} className="h-6 w-6 text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 bg-stone-200/50 dark:bg-stone-800/50">

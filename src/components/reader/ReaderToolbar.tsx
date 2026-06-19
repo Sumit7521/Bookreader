@@ -7,7 +7,8 @@ import {
   ZoomOut, 
   Maximize, 
   Search, 
-  X 
+  X,
+  PanelRight
 } from "lucide-react";
 import { useState } from "react";
 
@@ -20,6 +21,8 @@ interface ReaderToolbarProps {
   onZoomOut: () => void;
   onFullscreen: () => void;
   onSearch: (text: string) => void;
+  showSidebar: boolean;
+  onToggleSidebar: () => void;
 }
 
 export function ReaderToolbar({
@@ -30,7 +33,9 @@ export function ReaderToolbar({
   onZoomIn,
   onZoomOut,
   onFullscreen,
-  onSearch
+  onSearch,
+  showSidebar,
+  onToggleSidebar
 }: ReaderToolbarProps) {
   const [jumpTo, setJumpTo] = useState("");
   const [searchText, setSearchText] = useState("");
@@ -128,8 +133,16 @@ export function ReaderToolbar({
             <ZoomIn className="h-4 w-4" />
           </Button>
         </div>
-        <Button variant="outline" size="icon" onClick={onFullscreen}>
+        <Button variant="outline" size="icon" onClick={onFullscreen} title="Toggle fullscreen">
           <Maximize className="h-4 w-4" />
+        </Button>
+        <Button 
+          variant={showSidebar ? "secondary" : "outline"} 
+          size="icon" 
+          onClick={onToggleSidebar}
+          title={showSidebar ? "Hide sidebar" : "Show sidebar"}
+        >
+          <PanelRight className="h-4 w-4" />
         </Button>
       </div>
     </div>

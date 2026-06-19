@@ -124,10 +124,10 @@ export function BookDetailsClient({ book, initialReview }: BookDetailsProps) {
                 </Link>
                 
                 <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" className="w-full border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-900/30 dark:text-red-400 dark:hover:bg-red-950/20 transition-colors">
-                      <Trash2 className="h-4 w-4 mr-2" /> Delete Book
-                    </Button>
+                  <DialogTrigger render={
+                    <Button variant="outline" className="w-full border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-900/30 dark:text-red-400 dark:hover:bg-red-950/20 transition-colors" />
+                  }>
+                    <Trash2 className="h-4 w-4 mr-2" /> Delete Book
                   </DialogTrigger>
                   <DialogContent className="bg-[#fdfbf7] dark:bg-stone-950 border-stone-200 dark:border-stone-800">
                     <DialogHeader>

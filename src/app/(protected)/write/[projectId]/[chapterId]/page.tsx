@@ -19,9 +19,18 @@ export default async function ChapterEditorPage({ params }: { params: { projectI
 
   return (
     <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
-      <ChapterSidebar projectId={resolvedParams.projectId} initialChapters={chapters} activeChapterId={resolvedParams.chapterId} />
+      <ChapterSidebar 
+        projectId={resolvedParams.projectId} 
+        initialChapters={chapters} 
+        activeChapterId={resolvedParams.chapterId} 
+        className="hidden md:flex w-64" 
+      />
       <div className="flex-1 overflow-hidden px-4 md:px-8 pt-4 bg-white dark:bg-[#1a1a1a]">
-        <TiptapEditor chapter={chapterRes.chapter} projectId={resolvedParams.projectId} />
+        <TiptapEditor 
+          chapter={chapterRes.chapter} 
+          projectId={resolvedParams.projectId} 
+          chapters={chapters} 
+        />
       </div>
     </div>
   );

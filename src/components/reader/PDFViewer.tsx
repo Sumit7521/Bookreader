@@ -9,6 +9,7 @@ import { AnnotationsSidebar } from "./AnnotationsSidebar";
 import { saveReadingProgressAction } from "@/actions/reader";
 import { getAnnotationsAction, saveAnnotationAction, deleteAnnotationAction, updateAnnotationNoteAction } from "@/actions/annotations";
 import { Loader2 } from "lucide-react";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 // Configure PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
@@ -29,6 +30,30 @@ export function PDFViewer({ bookId, fileUrl, initialPage }: PDFViewerProps) {
   const [selectedText, setSelectedText] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
   const saveProgressTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  const [showSidebar, setShowSidebar] = useState(true);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [isMobileOrTablet, setIsMobileOrTablet] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      const isMobile = window.innerWidth < 1024;
+      setIsMobileOrTablet(isMobile);
+      setShowSidebar(!isMobile);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  const handleToggleSidebar = () => {
+    if (isMobileOrTablet) {
+      setMobileSidebarOpen(prev => !prev);
+    } else {
+      setShowSidebar(prev => !prev);
+    }
+  };
 
   // Fetch annotations on mount
   useEffect(() => {
@@ -181,14 +206,16 @@ export function PDFViewer({ bookId, fileUrl, initialPage }: PDFViewerProps) {
       <div className="flex-1 flex flex-col min-w-0 relative" onMouseUp={handleMouseUp}>
         <ReaderToolbar 
           pageNumber={pageNumber}
-        numPages={numPages}
-        scale={scale}
-        onPageChange={handlePageChange}
-        onZoomIn={handleZoomIn}
-        onZoomOut={handleZoomOut}
-        onFullscreen={handleFullscreen}
-        onSearch={setSearchText}
-      />
+          numPages={numPages}
+          scale={scale}
+          onPageChange={handlePageChange}
+          onZoomIn={handleZoomIn}
+          onZoomOut={handleZoomOut}
+          onFullscreen={handleFullscreen}
+          onSearch={setSearchText}
+          showSidebar={isMobileOrTablet ? mobileSidebarOpen : showSidebar}
+          onToggleSidebar={handleToggleSidebar}
+        />
       
         <div className="flex-1 overflow-auto bg-stone-200 dark:bg-stone-900 flex justify-center p-4 custom-scrollbar">
           {fileUrl ? (
@@ -236,16 +263,39 @@ export function PDFViewer({ bookId, fileUrl, initialPage }: PDFViewerProps) {
         )}
       </div>
 
-      {/* Annotations Sidebar */}
-      <AnnotationsSidebar 
-        bookId={bookId}
-        annotations={annotations}
-        currentPage={pageNumber}
-        onAddMarginNote={handleAddMarginNote}
-        onDelete={handleDeleteAnnotation}
-        onUpdateNote={handleUpdateNote}
-        onJumpToPage={handlePageChange}
-      />
+      {/* Annotations Sidebar - Desktop (shown inline) */}
+      {!isMobileOrTablet && showSidebar && (
+        <AnnotationsSidebar 
+          bookId={bookId}
+          annotations={annotations}
+          currentPage={pageNumber}
+          onAddMarginNote={handleAddMarginNote}
+          onDelete={handleDeleteAnnotation}
+          onUpdateNote={handleUpdateNote}
+          onJumpToPage={handlePageChange}
+        />
+      )}
+
+      {/* Annotations Sidebar - Mobile / Tablet (shown in Sheet) */}
+      {isMobileOrTablet && (
+        <Sheet open={mobileSidebarOpen} onOpenChange={setMobileSidebarOpen}>
+          <SheetContent side="right" className="p-0 w-80 sm:w-96 border-l border-stone-200 dark:border-stone-800 bg-[#fdfbf7] dark:bg-stone-900">
+            <AnnotationsSidebar 
+              bookId={bookId}
+              annotations={annotations}
+              currentPage={pageNumber}
+              onAddMarginNote={handleAddMarginNote}
+              onDelete={handleDeleteAnnotation}
+              onUpdateNote={handleUpdateNote}
+              onJumpToPage={(page) => {
+                handlePageChange(page);
+                setMobileSidebarOpen(false);
+              }}
+              className="w-full h-full flex flex-col overflow-hidden"
+            />
+          </SheetContent>
+        </Sheet>
+      )}
     </div>
   );
 }

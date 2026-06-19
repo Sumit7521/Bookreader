@@ -33,6 +33,7 @@ interface AnnotationsSidebarProps {
   onDelete: (id: string) => Promise<void>;
   onUpdateNote: (id: string, note: string) => Promise<void>;
   onJumpToPage: (page: number) => void;
+  className?: string;
 }
 
 const colorMap: Record<string, string> = {
@@ -49,7 +50,8 @@ export function AnnotationsSidebar({
   onAddMarginNote,
   onDelete,
   onUpdateNote,
-  onJumpToPage
+  onJumpToPage,
+  className
 }: AnnotationsSidebarProps) {
   const [newMarginNote, setNewMarginNote] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -101,7 +103,7 @@ export function AnnotationsSidebar({
   };
 
   return (
-    <div className="w-80 flex-shrink-0 bg-[#fdfbf7] dark:bg-stone-900 border-l border-stone-200 dark:border-stone-800 flex flex-col h-full overflow-hidden">
+    <div className={className || "w-80 flex-shrink-0 bg-[#fdfbf7] dark:bg-stone-900 border-l border-stone-200 dark:border-stone-800 flex flex-col h-full overflow-hidden"}>
       <Tabs defaultValue="notes" className="flex flex-col h-full w-full">
         <TabsList className="w-full justify-start rounded-none border-b border-stone-200 dark:border-stone-800 bg-transparent h-12 p-0">
           <TabsTrigger value="notes" className="flex-1 h-full rounded-none data-[state=active]:border-b-2 data-[state=active]:border-amber-600 data-[state=active]:shadow-none data-[state=active]:bg-stone-50 dark:data-[state=active]:bg-stone-900/50 text-stone-600 dark:text-stone-400">
