@@ -6,25 +6,41 @@ import { UploadBookModal } from "./UploadBookModal";
 import { CreateFolderModal } from "./CreateFolderModal";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { LayoutGrid, List as ListIcon, Folder as FolderIcon, BookUp } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { LayoutGrid, List as ListIcon, Folder as FolderIcon, BookUp, Search } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 interface LibraryData {
   folders: { _id: string; name: string; libraryFolderType?: string }[];
-  books: { _id: string; title: string; author?: string; status: string; coverImage?: string; folderId?: string; createdAt: string }[];
+  books: { _id: string; title: string; author?: string; status: string; coverImage?: string; folderId?: string; createdAt: string; tags: string[] }[];
 }
 
 export function LibraryManager({ initialData }: { initialData: LibraryData }) {
   const [view, setView] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] = useState<string>("recently_added");
   const [currentFolder, setCurrentFolder] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedTag, setSelectedTag] = useState("all_tags");
 
   const { folders, books } = initialData;
 
+  // Extract all unique tags
+  const allTags = Array.from(new Set(books.flatMap(b => b.tags || []))).sort();
+
   // Filter books by current folder (null means root, so show books without folder, or show all? Let's show all books in root for simplicity, or just those without a folder)
   // Actually, standard behavior: root shows folders and books not in any folder.
-  const displayedFolders = currentFolder ? [] : folders;
-  let displayedBooks = books.filter(b => currentFolder ? b.folderId === currentFolder : !b.folderId);
+  const displayedFolders = currentFolder && !searchQuery && selectedTag === "all_tags" ? [] : folders.filter(f => !searchQuery && selectedTag === "all_tags");
+  let displayedBooks = books.filter(b => {
+    // If searching or filtering by tag, ignore folders completely and search globally
+    if (searchQuery || selectedTag !== "all_tags") {
+      const matchesSearch = b.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                            (b.author || "").toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesTag = selectedTag === "all_tags" || (b.tags && b.tags.includes(selectedTag));
+      return matchesSearch && matchesTag;
+    }
+    return currentFolder ? b.folderId === currentFolder : !b.folderId;
+  });
 
   // Sorting
   displayedBooks = [...displayedBooks].sort((a, b) => {
@@ -46,9 +62,32 @@ export function LibraryManager({ initialData }: { initialData: LibraryData }) {
           <UploadBookModal folders={folders} />
           <CreateFolderModal />
         </div>
-        <div className="flex items-center gap-4 w-full sm:w-auto">
+        <div className="flex flex-wrap items-center gap-4 w-full sm:w-auto">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-stone-500" />
+            <Input 
+              type="text" 
+              placeholder="Search books..." 
+              className="w-[180px] pl-9 bg-white dark:bg-stone-950" 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+
+          <Select value={selectedTag} onValueChange={(v) => setSelectedTag(v || "all_tags")}>
+            <SelectTrigger className="w-[130px] bg-white dark:bg-stone-950">
+              <SelectValue placeholder="Filter Tag" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all_tags">All Tags</SelectItem>
+              {allTags.map(tag => (
+                <SelectItem key={tag} value={tag}>{tag}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
           <Select value={sortBy} onValueChange={(v) => setSortBy(v || "recently_added")}>
-            <SelectTrigger className="w-[180px] bg-white dark:bg-stone-950">
+            <SelectTrigger className="w-[150px] bg-white dark:bg-stone-950">
               <SelectValue placeholder="Sort by..." />
             </SelectTrigger>
             <SelectContent>

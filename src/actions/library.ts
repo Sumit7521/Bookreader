@@ -152,6 +152,7 @@ export async function getLibraryDataAction() {
         _id: doc._id.toString(),
         userId: doc.userId.toString(),
         folderId: doc.folderId?.toString(),
+        tags: doc.tags || [],
         createdAt: (doc.createdAt as Date)?.toISOString() || new Date().toISOString(),
         updatedAt: (doc.updatedAt as Date)?.toISOString() || new Date().toISOString()
       })));

@@ -3,12 +3,16 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Book as BookIcon, ChevronLeft, Star, Save, Trash2 } from "lucide-react";
+import { Book as BookIcon, ChevronLeft, Star, Save, Trash2, Plus, X } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { updateBookStatusAction, deleteBookAction } from "@/actions/book";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { updateBookStatusAction, deleteBookAction, updateBookTagsAction } from "@/actions/book";
 import { saveReviewAction } from "@/actions/review";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
@@ -20,6 +24,7 @@ interface BookDetailsProps {
     author?: string;
     coverImage?: string;
     status: string;
+    tags?: string[];
   };
   initialReview: {
     rating?: number;
@@ -28,12 +33,15 @@ interface BookDetailsProps {
     keyTakeaways?: string;
     favoriteQuotes?: string;
     characterNotes?: string;
+    isPublic?: boolean;
   } | null;
 }
 
 export function BookDetailsClient({ book, initialReview }: BookDetailsProps) {
   const router = useRouter();
   const [status, setStatus] = useState(book.status || "not_started");
+  const [tags, setTags] = useState<string[]>(book.tags || []);
+  const [newTag, setNewTag] = useState("");
   const [review, setReview] = useState({
     rating: initialReview?.rating || 0,
     content: initialReview?.content || "",
@@ -41,6 +49,7 @@ export function BookDetailsClient({ book, initialReview }: BookDetailsProps) {
     keyTakeaways: initialReview?.keyTakeaways || "",
     favoriteQuotes: initialReview?.favoriteQuotes || "",
     characterNotes: initialReview?.characterNotes || "",
+    isPublic: initialReview?.isPublic || false,
   });
   const [isSaving, setIsSaving] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -64,7 +73,29 @@ export function BookDetailsClient({ book, initialReview }: BookDetailsProps) {
     await updateBookStatusAction(book._id, newStatus);
   };
 
-  const handleReviewChange = (field: string, value: string | number) => {
+  const handleAddTag = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTag.trim()) return;
+    
+    const formattedTag = newTag.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
+    if (tags.includes(formattedTag)) {
+      setNewTag("");
+      return;
+    }
+
+    const updatedTags = [...tags, formattedTag];
+    setTags(updatedTags);
+    setNewTag("");
+    await updateBookTagsAction(book._id, updatedTags);
+  };
+
+  const handleRemoveTag = async (tagToRemove: string) => {
+    const updatedTags = tags.filter(t => t !== tagToRemove);
+    setTags(updatedTags);
+    await updateBookTagsAction(book._id, updatedTags);
+  };
+
+  const handleReviewChange = (field: string, value: string | number | boolean) => {
     setReview(prev => ({ ...prev, [field]: value }));
   };
 
@@ -118,6 +149,31 @@ export function BookDetailsClient({ book, initialReview }: BookDetailsProps) {
                 </Select>
               </div>
 
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-stone-500 uppercase tracking-wider">Tags</label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {tags.map(tag => (
+                    <Badge key={tag} variant="secondary" className="bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 gap-1 pr-1">
+                      {tag}
+                      <button onClick={() => handleRemoveTag(tag)} className="hover:text-red-500 transition-colors rounded-full p-0.5">
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+                <form onSubmit={handleAddTag} className="flex items-center gap-2">
+                  <Input 
+                    value={newTag}
+                    onChange={(e) => setNewTag(e.target.value)}
+                    placeholder="Add a tag..."
+                    className="h-8 text-sm"
+                  />
+                  <Button type="submit" size="sm" variant="outline" className="h-8 px-2">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </form>
+              </div>
+
               <div className="flex flex-col gap-2 mt-4">
                 <Link href={`/reader/${book._id}`} className={buttonVariants({ className: "w-full bg-amber-600 hover:bg-amber-700 text-white shadow-sm transition-colors" })}>
                   Read PDF
@@ -162,6 +218,18 @@ export function BookDetailsClient({ book, initialReview }: BookDetailsProps) {
             </CardHeader>
             <CardContent className="space-y-6 pt-6">
               
+              <div className="flex items-center justify-between p-4 bg-stone-50 dark:bg-stone-950/50 rounded-lg border border-stone-100 dark:border-stone-800">
+                <div className="space-y-0.5">
+                  <Label htmlFor="public-review" className="text-sm font-medium text-stone-700 dark:text-stone-300">Public Review</Label>
+                  <p className="text-xs text-stone-500">Allow other users to see this review on the Discover page.</p>
+                </div>
+                <Switch 
+                  id="public-review" 
+                  checked={review.isPublic}
+                  onCheckedChange={(checked) => handleReviewChange("isPublic", checked)}
+                />
+              </div>
+
               <div className="space-y-3 p-4 bg-stone-50 dark:bg-stone-950/50 rounded-lg border border-stone-100 dark:border-stone-800">
                 <label className="text-sm font-medium text-stone-700 dark:text-stone-300">Rating</label>
                 <div className="flex items-center gap-1">

@@ -34,6 +34,21 @@ export async function updateBookStatusAction(bookId: string, status: string) {
   }
 }
 
+export async function updateBookTagsAction(bookId: string, tags: string[]) {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Unauthorized" };
+  try {
+    await connectToDatabase();
+    await Book.findOneAndUpdate({ _id: bookId, userId: session.user.id }, { tags });
+    revalidatePath(`/library/${bookId}`);
+    revalidatePath(`/library`);
+    return { success: true };
+  } catch (error) {
+    console.error(error);
+    return { error: "Failed to update book tags" };
+  }
+}
+
 export async function deleteBookAction(bookId: string) {
   const session = await auth();
   if (!session?.user?.id) return { error: "Unauthorized" };

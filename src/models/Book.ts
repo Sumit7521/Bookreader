@@ -9,6 +9,7 @@ export interface IBook extends Document {
   filePublicId?: string;
   status: 'not_started' | 'reading' | 'finished' | 'dnf';
   folderId?: mongoose.Types.ObjectId;
+  tags?: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -23,6 +24,7 @@ const BookSchema: Schema = new Schema(
     filePublicId: { type: String },
     status: { type: String, enum: ['not_started', 'reading', 'finished', 'dnf'], default: 'not_started' },
     folderId: { type: Schema.Types.ObjectId, ref: 'Folder' },
+    tags: [{ type: String }],
   },
   {
     timestamps: true,

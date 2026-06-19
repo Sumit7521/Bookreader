@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Menu, BookOpen, LayoutDashboard, Library, PenTool, Settings } from "lucide-react";
+import { Menu, BookOpen, LayoutDashboard, Library, PenTool, Settings, Compass } from "lucide-react";
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
@@ -14,6 +14,7 @@ export function MobileNav() {
   const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/library", label: "Library", icon: Library },
+    { href: "/discover", label: "Discover", icon: Compass },
     { href: "/reader", label: "Reader", icon: BookOpen },
     { href: "/write", label: "Write", icon: PenTool },
     { href: "/settings", label: "Settings", icon: Settings },

@@ -18,7 +18,7 @@ export async function getReviewAction(bookId: string) {
   }
 }
 
-export async function saveReviewAction(bookId: string, data: Partial<{ rating: number; content: string; plotSummary: string; keyTakeaways: string; favoriteQuotes: string; characterNotes: string }>) {
+export async function saveReviewAction(bookId: string, data: Partial<{ rating: number; content: string; plotSummary: string; keyTakeaways: string; favoriteQuotes: string; characterNotes: string; isPublic: boolean }>) {
   const session = await auth();
   if (!session?.user?.id) return { error: "Unauthorized" };
   try {

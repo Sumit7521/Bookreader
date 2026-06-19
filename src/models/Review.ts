@@ -9,6 +9,7 @@ export interface IReview extends Document {
   keyTakeaways?: string;
   favoriteQuotes?: string;
   characterNotes?: string;
+  isPublic?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -23,6 +24,7 @@ const ReviewSchema: Schema = new Schema(
     keyTakeaways: { type: String },
     favoriteQuotes: { type: String },
     characterNotes: { type: String },
+    isPublic: { type: Boolean, default: false },
   },
   {
     timestamps: true,

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, LayoutDashboard, Library, PenTool, Settings } from "lucide-react";
+import { BookOpen, LayoutDashboard, Library, PenTool, Settings, Compass } from "lucide-react";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -10,6 +10,7 @@ export function Sidebar() {
   const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/library", label: "Library", icon: Library },
+    { href: "/discover", label: "Discover", icon: Compass },
     { href: "/reader", label: "Reader", icon: BookOpen },
     { href: "/write", label: "Write", icon: PenTool },
     { href: "/settings", label: "Settings", icon: Settings },

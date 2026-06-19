@@ -1,4 +1,5 @@
 import { getUsersWithBooks } from '@/actions/admin';
+import Link from 'next/link';
 import UserTable from './user-table';
 import { Metadata } from 'next';
 
@@ -12,7 +13,12 @@ export default async function AdminUsersPage() {
   return (
     <div className="container mx-auto py-10 px-4 max-w-7xl">
       <div className="flex flex-col gap-2 mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Users Management</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold tracking-tight">Users Management</h1>
+          <Link href="/admin/analytics" className="text-sm font-medium text-amber-600 hover:text-amber-700 underline">
+            View Analytics &rarr;
+          </Link>
+        </div>
         <p className="text-muted-foreground">
           View all registered users, their reading lists, and manage their account status.
         </p>
