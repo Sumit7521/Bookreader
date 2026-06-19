@@ -26,7 +26,7 @@ export async function saveReviewAction(bookId: string, data: Partial<{ rating: n
     const review = await Review.findOneAndUpdate(
       { bookId, userId: session.user.id },
       { ...data },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     ).lean();
     revalidatePath(`/library/${bookId}`);
     return { success: true, review: JSON.parse(JSON.stringify(review)) };

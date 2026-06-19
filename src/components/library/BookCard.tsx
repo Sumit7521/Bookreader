@@ -29,7 +29,7 @@ export function BookCard({ book, view }: BookCardProps) {
         <Card className="flex flex-row items-center p-3 gap-4 hover:bg-stone-50 dark:hover:bg-stone-900/50 transition-colors border-stone-200 dark:border-stone-800">
           <div className="relative w-12 h-16 bg-muted shrink-0 rounded-sm overflow-hidden flex items-center justify-center">
             {book.coverImage ? (
-              <Image src={book.coverImage} alt={book.title} fill className="object-cover" />
+              <Image src={book.coverImage} alt={book.title} fill sizes="48px" className="object-cover" />
             ) : (
               <BookIcon className="h-6 w-6 text-stone-400" />
             )}
@@ -52,7 +52,7 @@ export function BookCard({ book, view }: BookCardProps) {
       <Card className="flex flex-col h-full overflow-hidden border-stone-200 dark:border-stone-800 transition-all hover:shadow-md hover:border-amber-300 dark:hover:border-amber-700 bg-white/80 dark:bg-stone-900/80">
         <div className="relative aspect-[2/3] w-full bg-muted flex items-center justify-center">
           {book.coverImage ? (
-            <Image src={book.coverImage} alt={book.title} fill className="object-cover transition-transform group-hover:scale-105" />
+            <Image src={book.coverImage} alt={book.title} fill sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw" className="object-cover transition-transform group-hover:scale-105" />
           ) : (
             <BookIcon className="h-12 w-12 text-stone-400" />
           )}

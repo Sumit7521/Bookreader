@@ -29,7 +29,7 @@ export default async function DiscoverPage() {
               <CardHeader className="pb-3 border-b border-stone-100 dark:border-stone-800 flex flex-row items-center gap-4">
                 <div className="relative h-16 w-12 flex-shrink-0 bg-stone-100 dark:bg-stone-800 rounded overflow-hidden">
                   {review.bookId?.coverImage ? (
-                    <Image src={review.bookId.coverImage} alt={review.bookId.title || "Book"} fill className="object-cover" />
+                    <Image src={review.bookId.coverImage} alt={review.bookId.title || "Book"} fill sizes="48px" className="object-cover" />
                   ) : (
                     <div className="flex h-full items-center justify-center text-[10px] text-stone-400">No Cover</div>
                   )}

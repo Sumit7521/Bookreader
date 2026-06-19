@@ -124,7 +124,7 @@ export function BookDetailsClient({ book, initialReview }: BookDetailsProps) {
           <Card className="border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
             <div className="relative aspect-[2/3] w-full bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
               {book.coverImage ? (
-                <Image src={book.coverImage} alt={book.title} fill className="object-cover" />
+                <Image src={book.coverImage} alt={book.title} fill sizes="(max-width: 768px) 100vw, 33vw" priority className="object-cover" />
               ) : (
                 <BookIcon className="h-16 w-16 text-stone-300 dark:text-stone-700" />
               )}
