@@ -74,7 +74,10 @@ export default async function DiscoverPage() {
                 )}
                 
                 {review.bookId?._id && (
-                  <AddBookButton originalBookId={review.bookId._id.toString()} />
+                  <AddBookButton 
+                    originalBookId={review.bookId._id.toString()} 
+                    initialUserBookId={review.userBookId?.toString() || null}
+                  />
                 )}
               </CardContent>
             </Card>

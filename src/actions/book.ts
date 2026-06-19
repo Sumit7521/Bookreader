@@ -59,16 +59,20 @@ export async function deleteBookAction(bookId: string) {
     if (!book) return { error: "Book not found" };
 
     if (book.filePublicId) {
-      const resourceType = book.fileUrl?.includes("/raw/") ? "raw" : "image";
-      const type = book.fileUrl?.includes("/authenticated/") ? "authenticated" : "upload";
-      try {
-        const cloudinary = (await import("@/lib/cloudinary")).default;
-        await cloudinary.uploader.destroy(book.filePublicId, {
-          resource_type: resourceType,
-          type: type
-        });
-      } catch (cloudinaryError) {
-        console.error("Cloudinary delete failed:", cloudinaryError);
+      const otherBooksWithSameFile = await Book.countDocuments({ filePublicId: book.filePublicId, _id: { $ne: bookId } });
+      
+      if (otherBooksWithSameFile === 0) {
+        const resourceType = book.fileUrl?.includes("/raw/") ? "raw" : "image";
+        const type = book.fileUrl?.includes("/authenticated/") ? "authenticated" : "upload";
+        try {
+          const cloudinary = (await import("@/lib/cloudinary")).default;
+          await cloudinary.uploader.destroy(book.filePublicId, {
+            resource_type: resourceType,
+            type: type
+          });
+        } catch (cloudinaryError) {
+          console.error("Cloudinary delete failed:", cloudinaryError);
+        }
       }
     }
 

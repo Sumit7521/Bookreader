@@ -23,11 +23,27 @@ export async function getPublicReviewsAction() {
 
     const reviews = await Review.find({ isPublic: true })
       .populate('userId', 'name email')
-      .populate('bookId', 'title author coverImage')
+      .populate('bookId', 'title author coverImage filePublicId')
       .sort({ updatedAt: -1 })
       .lean();
 
-    return JSON.parse(JSON.stringify(reviews));
+    const userBooks = await Book.find({ userId: session.user.id }).select('filePublicId _id').lean();
+
+    const reviewsWithStatus = reviews.map((review: any) => {
+      let userBookId = null;
+      if (review.bookId?.filePublicId) {
+        const userBook = userBooks.find(b => b.filePublicId === review.bookId.filePublicId);
+        if (userBook) {
+          userBookId = userBook._id;
+        }
+      }
+      return {
+        ...review,
+        userBookId
+      };
+    });
+
+    return JSON.parse(JSON.stringify(reviewsWithStatus));
   } catch (error) {
     console.error("Error fetching public reviews:", error);
     return [];
