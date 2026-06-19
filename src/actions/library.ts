@@ -66,12 +66,7 @@ export async function saveBookRecordAction(data: { title: string, author: string
       if (resourceType === "image") {
         const cloudinaryLib = (await import("@/lib/cloudinary")).default;
         
-        let targetPublicId = data.filePublicId;
-        if (!targetPublicId.endsWith(".pdf")) {
-          targetPublicId += ".pdf";
-        }
-        
-        coverImage = cloudinaryLib.utils.url(targetPublicId, {
+        coverImage = cloudinaryLib.utils.url(data.filePublicId, {
           secure: true,
           sign_url: true,
           type: "authenticated",
