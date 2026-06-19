@@ -270,7 +270,7 @@ export function PDFViewer({ bookId, fileUrl, initialPage }: PDFViewerProps) {
           onToggleSidebar={handleToggleSidebar}
         />
       
-        <div className="flex-1 lg:overflow-auto bg-stone-200 dark:bg-stone-900 flex justify-center p-0 sm:p-4 custom-scrollbar min-h-[50vh]" ref={pdfWrapperRef}>
+        <div className="flex-1 lg:overflow-auto bg-stone-200 dark:bg-stone-900 flex justify-center p-0 sm:p-4 custom-scrollbar" ref={pdfWrapperRef}>
           {fileUrl ? (
             <Document
               file={fileUrl}

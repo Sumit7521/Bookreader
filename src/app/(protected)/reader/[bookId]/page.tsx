@@ -47,7 +47,7 @@ export default async function ReaderPage({ params }: { params: Promise<{ bookId:
   }
 
   return (
-    <div className="flex flex-col h-auto min-h-full lg:h-full space-y-4">
+    <div className="flex flex-col h-auto min-h-full lg:h-full gap-4">
       <div className="flex items-center gap-4 px-2 shrink-0">
         <Link href="/library" className="text-stone-500 hover:text-stone-800 dark:hover:text-stone-100 transition-colors">
           <ArrowLeft className="h-5 w-5" />
