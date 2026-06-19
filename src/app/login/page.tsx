@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#fdfbf7] dark:bg-stone-950 p-4 relative overflow-hidden">
+    <div className="flex min-h-[100vh] min-h-[100dvh] w-[100vw] items-center justify-center bg-[#fdfbf7] dark:bg-stone-950 p-4 relative overflow-hidden">
       {/* Decorative background circle to simulate reading light */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-amber-100/50 dark:bg-amber-900/10 rounded-full blur-3xl pointer-events-none" />
       

@@ -66,7 +66,7 @@ export function TiptapEditor({
   const wordCount = editor.storage.characterCount.words()
 
   return (
-    <div className="flex flex-col h-[calc(100vh-6rem)] animate-in fade-in duration-500">
+    <div className="flex flex-col h-full animate-in fade-in duration-500 pb-4 md:pb-0">
       <div className="flex items-center justify-between mb-4 border-b border-stone-200 dark:border-stone-800 pb-4">
         <div className="flex items-center gap-2 sm:gap-4">
           <Link href={`/write/${projectId}`} className="text-stone-500 hover:text-stone-800 dark:hover:text-stone-300 transition-colors">

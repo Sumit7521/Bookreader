@@ -53,63 +53,63 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8 pb-8">
       {/* Header Section */}
-      <div className="flex flex-col gap-2">
-        <h1 className="text-3xl sm:text-4xl font-serif text-stone-800 dark:text-stone-100">
+      <div className="flex flex-col gap-1 sm:gap-2">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif text-stone-800 dark:text-stone-100">
           {greeting}, {userName}.
         </h1>
-        <p className="text-stone-500 dark:text-stone-400">
+        <p className="text-sm sm:text-base text-stone-500 dark:text-stone-400">
           Welcome back to your digital library.
         </p>
       </div>
 
       {/* Stats Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         <Card className="bg-amber-50/50 dark:bg-stone-900/50 border-stone-200 dark:border-stone-800 shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-stone-600 dark:text-stone-300">Total Books</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2 sm:p-6 sm:pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium text-stone-600 dark:text-stone-300">Total Books</CardTitle>
             <Library className="h-4 w-4 text-amber-600 dark:text-amber-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold font-serif">{stats.totalBooks}</div>
+          <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+            <div className="text-xl sm:text-2xl font-bold font-serif">{stats.totalBooks}</div>
           </CardContent>
         </Card>
         <Card className="bg-amber-50/50 dark:bg-stone-900/50 border-stone-200 dark:border-stone-800 shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-stone-600 dark:text-stone-300">Writing Projects</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2 sm:p-6 sm:pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium text-stone-600 dark:text-stone-300">Writing Projects</CardTitle>
             <PenTool className="h-4 w-4 text-amber-600 dark:text-amber-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold font-serif">{stats.writingProjects}</div>
+          <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+            <div className="text-xl sm:text-2xl font-bold font-serif">{stats.writingProjects}</div>
           </CardContent>
         </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Currently Reading (Featured) */}
-        <div className="lg:col-span-2 space-y-4">
+        <div className="lg:col-span-2 space-y-3 sm:space-y-4">
           <div className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5 text-amber-700 dark:text-amber-500" />
-            <h2 className="text-xl font-serif text-stone-800 dark:text-stone-100">Currently Reading</h2>
+            <BookOpen className="h-4 w-4 sm:h-5 sm:w-5 text-amber-700 dark:text-amber-500" />
+            <h2 className="text-lg sm:text-xl font-serif text-stone-800 dark:text-stone-100">Currently Reading</h2>
           </div>
           <Card className="overflow-hidden border-stone-200 dark:border-stone-800 shadow-md">
             <div className="flex flex-col sm:flex-row h-full">
-              <div className="relative w-full sm:w-48 h-64 sm:h-auto bg-muted shrink-0">
-                <Image 
-                  src={currentlyReading.cover} 
+              <div className="relative w-full sm:w-40 md:w-48 h-56 sm:h-auto bg-muted shrink-0">
+                <Image
+                  src={currentlyReading.cover}
                   alt={currentlyReading.title}
                   fill
                   className="object-cover"
                 />
               </div>
-              <div className="flex flex-col flex-1 p-6 justify-between bg-white/80 dark:bg-stone-950/80 backdrop-blur-sm">
-                <div className="space-y-2">
-                  <Badge variant="secondary" className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 hover:bg-amber-100">
+              <div className="flex flex-col flex-1 p-4 sm:p-6 justify-between bg-white/80 dark:bg-stone-950/80 backdrop-blur-sm">
+                <div className="space-y-1 sm:space-y-2">
+                  <Badge variant="secondary" className="mb-1 sm:mb-0 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 hover:bg-amber-100 w-fit">
                     Active Session
                   </Badge>
-                  <h3 className="text-2xl font-serif font-bold text-stone-800 dark:text-stone-100">{currentlyReading.title}</h3>
-                  <p className="text-stone-500 dark:text-stone-400">by {currentlyReading.author}</p>
+                  <h3 className="text-xl sm:text-2xl font-serif font-bold text-stone-800 dark:text-stone-100">{currentlyReading.title}</h3>
+                  <p className="text-sm sm:text-base text-stone-500 dark:text-stone-400">by {currentlyReading.author}</p>
                 </div>
-                <div className="space-y-3 mt-6 sm:mt-0">
+                <div className="space-y-3 mt-4 sm:mt-0">
                   <div className="flex justify-between text-sm text-stone-600 dark:text-stone-300">
                     <span>{currentlyReading.progress}% Completed</span>
                   </div>
@@ -124,23 +124,23 @@ export default async function DashboardPage() {
         </div>
 
         {/* Writing Projects */}
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <div className="flex items-center gap-2">
-            <PenTool className="h-5 w-5 text-amber-700 dark:text-amber-500" />
-            <h2 className="text-xl font-serif text-stone-800 dark:text-stone-100">Your Projects</h2>
+            <PenTool className="h-4 w-4 sm:h-5 sm:w-5 text-amber-700 dark:text-amber-500" />
+            <h2 className="text-lg sm:text-xl font-serif text-stone-800 dark:text-stone-100">Your Projects</h2>
           </div>
-          <Card className="border-stone-200 dark:border-stone-800 shadow-sm h-[calc(100%-2.5rem)]">
+          <Card className="border-stone-200 dark:border-stone-800 shadow-sm h-auto lg:h-[calc(100%-2rem)] xl:h-[calc(100%-2.5rem)]">
             <CardContent className="p-0 flex flex-col h-full">
               {writingProjects.map((project, i) => (
                 <div key={project.id} className="flex flex-col">
-                  <div className="p-4 hover:bg-stone-50 dark:hover:bg-stone-900/50 transition-colors">
-                    <div className="flex justify-between items-start mb-1">
-                      <Link href="/write" className="font-medium text-stone-800 dark:text-stone-100 hover:underline">
+                  <div className="p-3 sm:p-4 hover:bg-stone-50 dark:hover:bg-stone-900/50 transition-colors">
+                    <div className="flex justify-between items-start mb-1 sm:mb-2 gap-2">
+                      <Link href="/write" className="font-medium text-sm sm:text-base text-stone-800 dark:text-stone-100 hover:underline leading-snug">
                         {project.title}
                       </Link>
-                      <Badge variant="outline" className="text-[10px] uppercase">{project.status}</Badge>
+                      <Badge variant="outline" className="text-[9px] sm:text-[10px] uppercase shrink-0 mt-0.5">{project.status}</Badge>
                     </div>
-                    <div className="flex items-center gap-3 text-xs text-stone-500 dark:text-stone-400">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] sm:text-xs text-stone-500 dark:text-stone-400">
                       <span className="flex items-center gap-1">
                         <BookUp className="h-3 w-3" />
                         {project.wordCount.toLocaleString()} words
@@ -165,12 +165,12 @@ export default async function DashboardPage() {
       </div>
 
       {/* Book Shelves */}
-      <div className="space-y-8 pt-4">
+      <div className="space-y-6 sm:space-y-8 pt-2 sm:pt-4">
         {/* Recently Opened */}
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <div className="flex items-center gap-2">
-            <Clock className="h-5 w-5 text-amber-700 dark:text-amber-500" />
-            <h2 className="text-xl font-serif text-stone-800 dark:text-stone-100">Recently Opened</h2>
+            <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-amber-700 dark:text-amber-500" />
+            <h2 className="text-lg sm:text-xl font-serif text-stone-800 dark:text-stone-100">Recently Opened</h2>
           </div>
           <ScrollArea className="w-full whitespace-nowrap pb-4">
             <div className="flex w-max space-x-4">
@@ -198,10 +198,10 @@ export default async function DashboardPage() {
         </div>
 
         {/* Favorites */}
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <div className="flex items-center gap-2">
-            <Star className="h-5 w-5 text-amber-700 dark:text-amber-500" />
-            <h2 className="text-xl font-serif text-stone-800 dark:text-stone-100">Favorites</h2>
+            <Star className="h-4 w-4 sm:h-5 sm:w-5 text-amber-700 dark:text-amber-500" />
+            <h2 className="text-lg sm:text-xl font-serif text-stone-800 dark:text-stone-100">Favorites</h2>
           </div>
           <ScrollArea className="w-full whitespace-nowrap pb-4">
             <div className="flex w-max space-x-4">

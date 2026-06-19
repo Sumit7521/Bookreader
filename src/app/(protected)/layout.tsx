@@ -24,10 +24,10 @@ export default async function ProtectedLayout({
 
   return (
     <SettingsProvider initialSettings={initialSettings} initialProfilePicture={initialProfilePicture}>
-      <div className="flex min-h-screen w-full">
+      <div className="flex h-[100vh] h-[100dvh] w-[100vw] overflow-hidden bg-stone-50/50 dark:bg-[#0a0a0a]">
         <Sidebar />
         <GlobalSearch />
-        <div className="flex flex-1 flex-col sm:gap-4 sm:py-4">
+        <div className="flex flex-1 flex-col min-w-0 w-full h-full relative">
           <Navbar />
           <PageContainer>{children}</PageContainer>
         </div>
