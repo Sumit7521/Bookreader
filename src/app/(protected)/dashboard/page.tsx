@@ -96,16 +96,17 @@ export default async function DashboardPage() {
     .populate('bookId')
     .lean();
     
-  let favorites = topReviews.map(r => {
-    const b = r.bookId as any;
-    if (!b) return null;
-    return {
-      id: b._id.toString(),
-      title: b.title,
-      author: b.author || "Unknown",
-      cover: b.coverImage || "https://images.unsplash.com/photo-1541963463532-d68292c34b19?q=80&w=300&auto=format&fit=crop",
-    }
-  }).filter(Boolean);
+  let favorites = topReviews
+    .filter(r => r.bookId)
+    .map(r => {
+      const b = r.bookId as any;
+      return {
+        id: b._id.toString(),
+        title: b.title,
+        author: b.author || "Unknown",
+        cover: b.coverImage || "https://images.unsplash.com/photo-1541963463532-d68292c34b19?q=80&w=300&auto=format&fit=crop",
+      };
+    });
 
   if (favorites.length === 0) {
     const fallbackBooks = await Book.find({ userId, tags: { $regex: /favorite/i } }).limit(4).lean();
