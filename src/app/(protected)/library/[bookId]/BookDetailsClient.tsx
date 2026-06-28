@@ -34,7 +34,6 @@ interface BookDetailsProps {
     keyTakeaways?: string;
     favoriteQuotes?: string;
     characterNotes?: string;
-    characterNotes?: string;
     isPublic?: boolean;
   } | null;
   folders: { _id: string; name: string }[];
