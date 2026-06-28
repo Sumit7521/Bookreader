@@ -76,7 +76,8 @@ export function BookDetailsClient({ book, initialReview, folders }: BookDetailsP
     await updateBookStatusAction(book._id, newStatus);
   };
 
-  const handleFolderChange = async (newFolder: string) => {
+  const handleFolderChange = async (newFolder: string | null) => {
+    if (!newFolder) return;
     setFolder(newFolder);
     await updateBookFolderAction(book._id, newFolder);
   };
