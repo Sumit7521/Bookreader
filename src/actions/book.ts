@@ -124,3 +124,22 @@ export async function toggleFavoriteAction(bookId: string) {
     return { error: "Failed to toggle favorite" };
   }
 }
+
+export async function updateBookFolderAction(bookId: string, folderId: string) {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Unauthorized" };
+  try {
+    await connectToDatabase();
+    if (!folderId || folderId === "root") {
+      await Book.findOneAndUpdate({ _id: bookId, userId: session.user.id }, { $unset: { folderId: "" } });
+    } else {
+      await Book.findOneAndUpdate({ _id: bookId, userId: session.user.id }, { folderId });
+    }
+    revalidatePath(`/library/${bookId}`);
+    revalidatePath(`/library`);
+    return { success: true };
+  } catch (error) {
+    console.error(error);
+    return { error: "Failed to update book folder" };
+  }
+}

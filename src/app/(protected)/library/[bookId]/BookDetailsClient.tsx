@@ -12,7 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { updateBookStatusAction, deleteBookAction, updateBookTagsAction } from "@/actions/book";
+import { updateBookStatusAction, deleteBookAction, updateBookTagsAction, updateBookFolderAction } from "@/actions/book";
 import { saveReviewAction } from "@/actions/review";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
@@ -25,6 +25,7 @@ interface BookDetailsProps {
     coverImage?: string;
     status: string;
     tags?: string[];
+    folderId?: string;
   };
   initialReview: {
     rating?: number;
@@ -33,13 +34,16 @@ interface BookDetailsProps {
     keyTakeaways?: string;
     favoriteQuotes?: string;
     characterNotes?: string;
+    characterNotes?: string;
     isPublic?: boolean;
   } | null;
+  folders: { _id: string; name: string }[];
 }
 
-export function BookDetailsClient({ book, initialReview }: BookDetailsProps) {
+export function BookDetailsClient({ book, initialReview, folders }: BookDetailsProps) {
   const router = useRouter();
   const [status, setStatus] = useState(book.status || "not_started");
+  const [folder, setFolder] = useState(book.folderId || "root");
   const [tags, setTags] = useState<string[]>(book.tags || []);
   const [newTag, setNewTag] = useState("");
   const [review, setReview] = useState({
@@ -71,6 +75,11 @@ export function BookDetailsClient({ book, initialReview }: BookDetailsProps) {
     if (!newStatus) return;
     setStatus(newStatus);
     await updateBookStatusAction(book._id, newStatus);
+  };
+
+  const handleFolderChange = async (newFolder: string) => {
+    setFolder(newFolder);
+    await updateBookFolderAction(book._id, newFolder);
   };
 
   const handleAddTag = async (e: React.FormEvent) => {
@@ -144,6 +153,21 @@ export function BookDetailsClient({ book, initialReview }: BookDetailsProps) {
                   <SelectContent>
                     {statusOptions.map(opt => (
                       <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-stone-500 uppercase tracking-wider">Folder</label>
+                <Select value={folder} onValueChange={handleFolderChange}>
+                  <SelectTrigger className="w-full bg-stone-50 dark:bg-stone-950">
+                    <SelectValue placeholder="Select folder" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="root">Root Library (No Folder)</SelectItem>
+                    {folders.map(f => (
+                      <SelectItem key={f._id} value={f._id}>{f.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
