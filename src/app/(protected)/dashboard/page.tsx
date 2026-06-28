@@ -8,35 +8,26 @@ import { BookOpen, PenTool, Library, Star, Clock, BookUp } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-// Mock Data
-const currentlyReading = {
-  title: "The Name of the Wind",
-  author: "Patrick Rothfuss",
-  progress: 68,
-  cover: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=300&auto=format&fit=crop",
-};
+import connectToDatabase from "@/lib/db";
+import Book from "@/models/Book";
+import WritingProject from "@/models/WritingProject";
+import Chapter from "@/models/Chapter";
+import Review from "@/models/Review";
 
-const recentlyOpened = [
-  { id: 1, title: "Dune", author: "Frank Herbert", cover: "https://images.unsplash.com/photo-1541963463532-d68292c34b19?q=80&w=300&auto=format&fit=crop" },
-  { id: 2, title: "1984", author: "George Orwell", cover: "https://images.unsplash.com/photo-1532012197267-da84d127e765?q=80&w=300&auto=format&fit=crop" },
-  { id: 3, title: "Project Hail Mary", author: "Andy Weir", cover: "https://images.unsplash.com/photo-1614728263952-84ea256f9679?q=80&w=300&auto=format&fit=crop" },
-  { id: 4, title: "Fahrenheit 451", author: "Ray Bradbury", cover: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?q=80&w=300&auto=format&fit=crop" },
-];
-
-const favorites = [
-  { id: 4, title: "The Hobbit", author: "J.R.R. Tolkien", cover: "https://images.unsplash.com/photo-1608889175123-8ee362201f81?q=80&w=300&auto=format&fit=crop" },
-  { id: 5, title: "Pride and Prejudice", author: "Jane Austen", cover: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=300&auto=format&fit=crop" },
-];
-
-const writingProjects = [
-  { id: 1, title: "The Midnight Library", status: "Draft", wordCount: 15420, lastEdited: "2 hours ago" },
-  { id: 2, title: "Sci-Fi Short Story", status: "Outlining", wordCount: 3200, lastEdited: "Yesterday" },
-];
-
-const stats = {
-  totalBooks: 142,
-  writingProjects: 2,
-};
+function timeAgo(date: Date) {
+  const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+  let interval = seconds / 31536000;
+  if (interval > 1) return Math.floor(interval) + " years ago";
+  interval = seconds / 2592000;
+  if (interval > 1) return Math.floor(interval) + " months ago";
+  interval = seconds / 86400;
+  if (interval > 1) return Math.floor(interval) + " days ago";
+  interval = seconds / 3600;
+  if (interval > 1) return Math.floor(interval) + " hours ago";
+  interval = seconds / 60;
+  if (interval > 1) return Math.floor(interval) + " mins ago";
+  return Math.floor(seconds) + " secs ago";
+}
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -48,7 +39,83 @@ function getGreeting() {
 export default async function DashboardPage() {
   const session = await auth();
   const userName = session?.user?.name || "Reader";
+  const userId = session?.user?.id;
   const greeting = getGreeting();
+
+  await connectToDatabase();
+
+  // Stats
+  const totalBooks = await Book.countDocuments({ userId });
+  const writingProjectsCount = await WritingProject.countDocuments({ userId });
+  const stats = {
+    totalBooks,
+    writingProjects: writingProjectsCount,
+  };
+
+  // Writing Projects
+  const recentProjects = await WritingProject.find({ userId }).sort({ updatedAt: -1 }).limit(3).lean();
+  const projectIds = recentProjects.map(p => p._id);
+  const wordCounts = await Chapter.aggregate([
+    { $match: { projectId: { $in: projectIds } } },
+    { $group: { _id: "$projectId", totalWords: { $sum: "$wordCount" } } }
+  ]);
+  
+  const writingProjects = recentProjects.map(p => {
+    const words = wordCounts.find(wc => wc._id.toString() === p._id.toString())?.totalWords || 0;
+    return {
+      id: p._id.toString(),
+      title: p.title,
+      status: p.status,
+      wordCount: words,
+      lastEdited: p.updatedAt ? timeAgo(new Date(p.updatedAt)) : "Recently",
+    };
+  });
+
+  // Currently Reading
+  const currentlyReadingBook = await Book.findOne({ userId, status: 'reading' }).sort({ updatedAt: -1 }).lean();
+  const currentlyReading = currentlyReadingBook ? {
+    title: currentlyReadingBook.title,
+    author: currentlyReadingBook.author || "Unknown",
+    progress: 0, // Book model doesn't store total pages directly, keeping it simple
+    cover: currentlyReadingBook.coverImage || "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=300&auto=format&fit=crop",
+  } : null;
+
+  // Recently Opened
+  const recentBooks = await Book.find({ userId }).sort({ updatedAt: -1 }).limit(4).lean();
+  const recentlyOpened = recentBooks.map(b => ({
+    id: b._id.toString(),
+    title: b.title,
+    author: b.author || "Unknown",
+    cover: b.coverImage || "https://images.unsplash.com/photo-1541963463532-d68292c34b19?q=80&w=300&auto=format&fit=crop",
+  }));
+
+  // Favorites
+  const topReviews = await Review.find({ userId, rating: { $gte: 4 } })
+    .sort({ rating: -1, updatedAt: -1 })
+    .limit(4)
+    .populate('bookId')
+    .lean();
+    
+  let favorites = topReviews.map(r => {
+    const b = r.bookId as any;
+    if (!b) return null;
+    return {
+      id: b._id.toString(),
+      title: b.title,
+      author: b.author || "Unknown",
+      cover: b.coverImage || "https://images.unsplash.com/photo-1541963463532-d68292c34b19?q=80&w=300&auto=format&fit=crop",
+    }
+  }).filter(Boolean);
+
+  if (favorites.length === 0) {
+    const fallbackBooks = await Book.find({ userId, tags: { $regex: /favorite/i } }).limit(4).lean();
+    favorites = fallbackBooks.map(b => ({
+      id: b._id.toString(),
+      title: b.title,
+      author: b.author || "Unknown",
+      cover: b.coverImage || "https://images.unsplash.com/photo-1541963463532-d68292c34b19?q=80&w=300&auto=format&fit=crop",
+    }));
+  }
 
   return (
     <div className="space-y-8 pb-8">
@@ -91,36 +158,49 @@ export default async function DashboardPage() {
             <BookOpen className="h-4 w-4 sm:h-5 sm:w-5 text-amber-700 dark:text-amber-500" />
             <h2 className="text-lg sm:text-xl font-serif text-stone-800 dark:text-stone-100">Currently Reading</h2>
           </div>
-          <Card className="overflow-hidden border-stone-200 dark:border-stone-800 shadow-md">
-            <div className="flex flex-col sm:flex-row h-full">
-              <div className="relative w-full sm:w-40 md:w-48 h-56 sm:h-auto bg-muted shrink-0">
-                <Image
-                  src={currentlyReading.cover}
-                  alt={currentlyReading.title}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="flex flex-col flex-1 p-4 sm:p-6 justify-between bg-white/80 dark:bg-stone-950/80 backdrop-blur-sm">
-                <div className="space-y-1 sm:space-y-2">
-                  <Badge variant="secondary" className="mb-1 sm:mb-0 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 hover:bg-amber-100 w-fit">
-                    Active Session
-                  </Badge>
-                  <h3 className="text-xl sm:text-2xl font-serif font-bold text-stone-800 dark:text-stone-100">{currentlyReading.title}</h3>
-                  <p className="text-sm sm:text-base text-stone-500 dark:text-stone-400">by {currentlyReading.author}</p>
+          {currentlyReading ? (
+            <Card className="overflow-hidden border-stone-200 dark:border-stone-800 shadow-md">
+              <div className="flex flex-col sm:flex-row h-full">
+                <div className="relative w-full sm:w-40 md:w-48 h-56 sm:h-auto bg-muted shrink-0">
+                  <Image
+                    src={currentlyReading.cover}
+                    alt={currentlyReading.title}
+                    fill
+                    className="object-cover"
+                  />
                 </div>
-                <div className="space-y-3 mt-4 sm:mt-0">
-                  <div className="flex justify-between text-sm text-stone-600 dark:text-stone-300">
-                    <span>{currentlyReading.progress}% Completed</span>
+                <div className="flex flex-col flex-1 p-4 sm:p-6 justify-between bg-white/80 dark:bg-stone-950/80 backdrop-blur-sm">
+                  <div className="space-y-1 sm:space-y-2">
+                    <Badge variant="secondary" className="mb-1 sm:mb-0 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 hover:bg-amber-100 w-fit">
+                      Active Session
+                    </Badge>
+                    <h3 className="text-xl sm:text-2xl font-serif font-bold text-stone-800 dark:text-stone-100">{currentlyReading.title}</h3>
+                    <p className="text-sm sm:text-base text-stone-500 dark:text-stone-400">by {currentlyReading.author}</p>
                   </div>
-                  <Progress value={currentlyReading.progress} className="h-2" />
-                  <Link href="/reader" className="text-sm font-medium text-amber-700 dark:text-amber-500 hover:underline pt-2 inline-block">
-                    Continue reading &rarr;
-                  </Link>
+                  <div className="space-y-3 mt-4 sm:mt-0">
+                    {currentlyReading.progress > 0 && (
+                      <>
+                        <div className="flex justify-between text-sm text-stone-600 dark:text-stone-300">
+                          <span>{currentlyReading.progress}% Completed</span>
+                        </div>
+                        <Progress value={currentlyReading.progress} className="h-2" />
+                      </>
+                    )}
+                    <Link href="/reader" className="text-sm font-medium text-amber-700 dark:text-amber-500 hover:underline pt-2 inline-block">
+                      Continue reading &rarr;
+                    </Link>
+                  </div>
                 </div>
               </div>
-            </div>
-          </Card>
+            </Card>
+          ) : (
+            <Card className="flex flex-col items-center justify-center p-8 border-stone-200 dark:border-stone-800 shadow-sm border-dashed h-40">
+              <p className="text-stone-500 mb-4">You are not currently reading any books.</p>
+              <Link href="/library" className="text-sm font-medium text-amber-700 dark:text-amber-500 hover:underline">
+                Browse Library
+              </Link>
+            </Card>
+          )}
         </div>
 
         {/* Writing Projects */}
