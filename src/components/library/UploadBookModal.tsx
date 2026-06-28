@@ -117,7 +117,7 @@ export function UploadBookModal({ folders, authors }: UploadBookModalProps) {
           </div>
           <div className="space-y-2">
             <Label htmlFor="folderId">Folder (Optional)</Label>
-            <Select name="folderId" value={folderId} onValueChange={setFolderId}>
+            <Select name="folderId" value={folderId} onValueChange={(val) => setFolderId(val || "")}>
               <SelectTrigger className="bg-white/50 dark:bg-stone-900/50">
                 <SelectValue placeholder="Select a folder">
                   {folderId ? folders.find(f => f._id === folderId)?.name : "Select a folder"}
