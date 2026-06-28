@@ -163,3 +163,25 @@ export async function getLibraryDataAction() {
     return { folders: [], books: [], error: "Failed to fetch library data." };
   }
 }
+
+export async function deleteFolderAction(folderId: string) {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Unauthorized" };
+
+  try {
+    await connectToDatabase();
+    await Folder.findOneAndDelete({ _id: folderId, userId: session.user.id });
+    
+    // Unset the folderId on any books that were in this folder
+    await Book.updateMany(
+      { folderId: folderId, userId: session.user.id },
+      { $unset: { folderId: "" } }
+    );
+
+    revalidatePath("/library");
+    return { success: true };
+  } catch (error) {
+    console.error(error);
+    return { error: "Failed to delete folder." };
+  }
+}

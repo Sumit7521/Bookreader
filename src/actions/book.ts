@@ -95,3 +95,32 @@ export async function deleteBookAction(bookId: string) {
     return { error: "Failed to delete book" };
   }
 }
+
+export async function toggleFavoriteAction(bookId: string) {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Unauthorized" };
+  try {
+    await connectToDatabase();
+    const book = await Book.findOne({ _id: bookId, userId: session.user.id });
+    if (!book) return { error: "Book not found" };
+
+    const tags = book.tags || [];
+    const isFavorite = tags.some((t: string) => t.toLowerCase() === 'favorite');
+    
+    let newTags;
+    if (isFavorite) {
+      newTags = tags.filter((t: string) => t.toLowerCase() !== 'favorite');
+    } else {
+      newTags = [...tags, 'favorite'];
+    }
+
+    await Book.findOneAndUpdate({ _id: bookId, userId: session.user.id }, { tags: newTags });
+    revalidatePath(`/library/${bookId}`);
+    revalidatePath(`/library`);
+    revalidatePath(`/dashboard`);
+    return { success: true, isFavorite: !isFavorite };
+  } catch (error) {
+    console.error(error);
+    return { error: "Failed to toggle favorite" };
+  }
+}

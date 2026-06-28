@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { deleteFolderAction } from "@/actions/library";
 import { BookCard } from "./BookCard";
 import { UploadBookModal } from "./UploadBookModal";
 import { CreateFolderModal } from "./CreateFolderModal";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { LayoutGrid, List as ListIcon, Folder as FolderIcon, BookUp, Search } from "lucide-react";
+import { LayoutGrid, List as ListIcon, Folder as FolderIcon, BookUp, Search, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -22,11 +23,13 @@ export function LibraryManager({ initialData }: { initialData: LibraryData }) {
   const [currentFolder, setCurrentFolder] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTag, setSelectedTag] = useState("all_tags");
+  const [isPending, startTransition] = useTransition();
 
   const { folders, books } = initialData;
 
-  // Extract all unique tags
+  // Extract all unique tags and authors
   const allTags = Array.from(new Set(books.flatMap(b => b.tags || []))).sort();
+  const allAuthors = Array.from(new Set(books.map(b => b.author).filter(Boolean))).sort() as string[];
 
   // Filter books by current folder (null means root, so show books without folder, or show all? Let's show all books in root for simplicity, or just those without a folder)
   // Actually, standard behavior: root shows folders and books not in any folder.
@@ -59,7 +62,7 @@ export function LibraryManager({ initialData }: { initialData: LibraryData }) {
       {/* Top Toolbar */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/50 dark:bg-stone-900/50 p-4 rounded-lg border border-stone-200 dark:border-stone-800 backdrop-blur-sm">
         <div className="flex items-center gap-2">
-          <UploadBookModal folders={folders} />
+          <UploadBookModal folders={folders} authors={allAuthors} />
           <CreateFolderModal />
         </div>
         <div className="flex flex-wrap items-center gap-4 w-full sm:w-auto">
@@ -107,16 +110,36 @@ export function LibraryManager({ initialData }: { initialData: LibraryData }) {
         </div>
       </div>
 
-      {/* Breadcrumb / Navigation (Optional simple version) */}
+      {/* Breadcrumb / Navigation */}
       {currentFolder && (
-        <div className="flex items-center gap-2 text-sm text-stone-500">
-          <button onClick={() => setCurrentFolder(null)} className="hover:text-stone-800 dark:hover:text-stone-100 hover:underline">
-            Library
+        <div className="flex items-center justify-between w-full px-3 py-2 bg-stone-50/50 dark:bg-stone-900/30 rounded-md border border-stone-100 dark:border-stone-800">
+          <div className="flex items-center gap-2 text-sm text-stone-500">
+            <button onClick={() => setCurrentFolder(null)} className="hover:text-stone-800 dark:hover:text-stone-100 hover:underline font-medium">
+              Library
+            </button>
+            <span>/</span>
+            <span className="font-medium text-stone-800 dark:text-stone-100">
+              {folders.find(f => f._id === currentFolder)?.name}
+            </span>
+          </div>
+          
+          <button
+            onClick={() => {
+              if (confirm("Are you sure you want to delete this folder? Any books inside will be moved to the root library.")) {
+                startTransition(async () => {
+                  const res = await deleteFolderAction(currentFolder);
+                  if (res?.success) {
+                    setCurrentFolder(null);
+                  }
+                });
+              }
+            }}
+            disabled={isPending}
+            className="flex items-center gap-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/30 px-2 py-1.5 rounded transition-colors disabled:opacity-50"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            Delete Folder
           </button>
-          <span>/</span>
-          <span className="font-medium text-stone-800 dark:text-stone-100">
-            {folders.find(f => f._id === currentFolder)?.name}
-          </span>
         </div>
       )}
 

@@ -13,12 +13,14 @@ import { UploadCloud } from "lucide-react";
 
 interface UploadBookModalProps {
   folders: { _id: string; name: string }[];
+  authors: string[];
 }
 
-export function UploadBookModal({ folders }: UploadBookModalProps) {
+export function UploadBookModal({ folders, authors }: UploadBookModalProps) {
   const [open, setOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [folderId, setFolderId] = useState<string>("");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -106,13 +108,20 @@ export function UploadBookModal({ folders }: UploadBookModalProps) {
           </div>
           <div className="space-y-2">
             <Label htmlFor="author">Author (Optional)</Label>
-            <Input id="author" name="author" placeholder="e.g., J.R.R. Tolkien" className="bg-white/50 dark:bg-stone-900/50" />
+            <Input id="author" name="author" list="authors-list" placeholder="e.g., J.R.R. Tolkien" className="bg-white/50 dark:bg-stone-900/50" />
+            <datalist id="authors-list">
+              {authors.map((a, i) => (
+                <option key={i} value={a} />
+              ))}
+            </datalist>
           </div>
           <div className="space-y-2">
             <Label htmlFor="folderId">Folder (Optional)</Label>
-            <Select name="folderId">
+            <Select name="folderId" value={folderId} onValueChange={setFolderId}>
               <SelectTrigger className="bg-white/50 dark:bg-stone-900/50">
-                <SelectValue placeholder="Select a folder" />
+                <SelectValue placeholder="Select a folder">
+                  {folderId ? folders.find(f => f._id === folderId)?.name : "Select a folder"}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {folders.map(f => (
